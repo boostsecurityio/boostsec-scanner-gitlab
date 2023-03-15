@@ -1,0 +1,23 @@
+include:
+   - local: 'scanner.yml'
+
+build-main:
+  stage: build
+  extends:
+    - .boost_scan
+  variables:
+    BOOST_API_ENABLED: "false"
+    BOOST_CLI_VERSION: "1.0.0.rc129"
+    BOOST_SCANNER_REGISTRY_MODULE: "boostsecurityio/native-scanner"
+
+build-pullrequest:
+  stage: build
+  extends:
+    - .boost_scan
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+  variables:
+    BOOST_API_ENABLED: "false"
+    BOOST_CLI_VERSION: "1.0.0.rc129"
+    BOOST_SCANNER_REGISTRY_MODULE: "boostsecurityio/native-scanner"
+
