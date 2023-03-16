@@ -28,7 +28,9 @@
 
         boost_cli_scan () {
           # shellcheck disable=SC2086
-          ${BOOST_EXE} scan repo ${BOOST_CLI_ARGUMENTS:-}
+          if ! ${BOOST_EXE} scan repo ${BOOST_CLI_ARGUMENTS:-}; then
+            exit $?
+          fi
         }
 
         boost_init_config
