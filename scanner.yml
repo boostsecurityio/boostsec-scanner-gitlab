@@ -26,11 +26,6 @@
           curl --silent "${BOOST_DOWNLOAD_URL}" | bash
         }
 
-        boost_cli_scan () {
-          # shellcheck disable=SC2086
-          ${BOOST_EXE} scan repo ${BOOST_CLI_ARGUMENTS:-}
-        }
-
         boost_init_config
         boost_init_cli
 
@@ -48,11 +43,19 @@
     DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: ""
 
+.boost_rules:
+  rules:
+    # execute on pushes to the default branch
+    - if: ($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH)
+    # execute on merge request
+    - if: ($CI_PIPELINE_SOURCE == "merge_request_event")
+
 .boost_scan:
   extends:
     - .boost_setup
     - .boost_dind
+    - .boost_rules
   script:
-    - boost_cli_scan
+    -  ${BOOST_EXE} scan repo ${BOOST_CLI_ARGUMENTS:-}
   variables:
     GIT_DEPTH: 1

@@ -1,0 +1,143 @@
+#!/usr/bin/env bash
+set -e
+set -o pipefail
+set -u
+
+GITLAB_ACCESS_TOKEN=${GITLAB_ACCESS_TOKEN:-$(secret print GITLAB_ACCESS_TOKEN)}
+PROJECT_ID=${GITLAB_PROJECT_ID}
+BRANCH=${BRANCH_NAME}
+
+POLL_ATTEMPTS=60
+POLL_INTERVAL=10
+
+api ()
+{ # $1=method, $2=uri, $@=args
+  local method uri response exitcode
+  method=${1}; shift
+  uri=${1}; shift
+
+  set +e
+  response=$(curl \
+    --request "${method}" \
+    --silent \
+    --fail-with-body \
+    --header "PRIVATE-TOKEN: ${GITLAB_ACCESS_TOKEN}" \
+    "https://gitlab.com/api/v4/${uri}" ${@})
+
+  exitcode=$?
+  set -e
+
+  if [ $exitcode -gt 0 ]; then
+    if [[ ${response:0:1} == "{" ]]; then
+      error "$(echo "${response}" | jq -C .)"
+    else
+      error "${response}"
+    fi
+  fi
+
+  echo "${response}"
+  return $exitcode
+}
+
+info ()
+{ # $*=message
+  printf "[\033[34m%s\033[0m] %s\n" "INFO" "${*}";
+}
+
+error ()
+{ # $*=message
+  printf "[\033[31m%s\033[0m] %s\n" "ERROR" "${*}" >&2
+}
+
+get.merge_request.id ()
+{ # $1=project, $2=branch name
+  api GET "projects/${1}/merge_requests" \
+    --get --data-urlencode "source_branch=${2}" --data-urlencode "state=opened" |
+    jq -r '.[0].iid'
+}
+
+new.merge_request.id ()
+{ # $1=project, $2=branch, $3=title
+  api POST "projects/${1}/merge_requests" \
+    --get \
+    --data-urlencode "title=${3}" \
+    --data-urlencode "source_branch=${2}" \
+    --data-urlencode "target_branch=main" \
+    | jq -r '.iid'
+}
+
+del.merge_request.id ()
+{ # $1=project, $2=id
+  api DELETE "projects/${1}/merge_requests/${2}"
+}
+
+get.commit.status ()
+{ # $1=project, $2=sha
+  api "GET" "projects/${1}/repository/commits/${2}/statuses" \
+    | jq -r '.[].status'
+}
+
+poll.commit.status ()
+{ # $1=project, $2=sha
+  local attempt=0
+  local status laststatus
+
+  let attempt+=1
+  laststatus="pending"
+
+  while true; do
+    attempt=$(($attempt + 1))
+    status=$(get.commit.status "${1}" "${2}")
+
+    info "polling commit status: ${attempt} or ${POLL_ATTEMPTS}"
+
+    if [ "${status}" != "${laststatus}" ]; then
+      info "- pipeline in ${status:-$laststatus}"
+    fi
+
+    case "${status}" in
+      success) return 0 ;;
+      failed)  return 1 ;;
+      canceled) return 1 ;;
+    esac
+
+    if [ ${attempt} -ge ${POLL_ATTEMPTS} ]; then
+      error "pipeline completion timeout"
+      exit 1
+    fi
+
+    laststatus=${status}
+    sleep ${POLL_INTERVAL}
+  done
+}
+
+case "${1:-}" in
+  create)
+    req_id=$(get.merge_request.id "${PROJECT_ID}" "${BRANCH}")
+    if [ "${req_id}" == "null" ]; then
+      info "creating merge request"
+      req_id=$(new.merge_request.id "${PROJECT_ID}" "${BRANCH}" "synchronize")
+      info " - merge_request: ${req_id}"
+    else
+      info "found existing merge request ${req_id}"
+    fi
+    ;;
+  delete)
+    req_id=$(get.merge_request.id "${PROJECT_ID}" "${BRANCH}")
+    if [ "${req_id}" == "null" ]; then
+      info "no merge request found"
+    else
+      info "deleting merge request ${req_id}"
+      del.merge_request.id "${PROJECT_ID}" "${req_id}" > /dev/null
+    fi
+    ;;
+  poll)
+    shasum=$(git rev-parse HEAD)
+    poll.commit.status "${PROJECT_ID}" "${shasum}"
+    ;;
+  *)
+    error "invalid argument: create|delete|poll"
+    exit 1
+    ;;
+esac
+
