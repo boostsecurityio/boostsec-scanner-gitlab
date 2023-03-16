@@ -1,25 +1,18 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
 include:
    - local: 'scanner.yml'
 
-build-main:
+scan:
   stage: build
   extends:
     - .boost_scan
-  except:
-    - external_pull_requests
-  script:
-    - env |grep ^CI_
-  variables:
-    BOOST_API_ENABLED: "false"
-    BOOST_CLI_VERSION: "1.0.0.rc129"
-    BOOST_SCANNER_REGISTRY_MODULE: "boostsecurityio/native-scanner"
-
-build-pullrequest:
-  stage: build
-  extends:
-    - .boost_scan
-  only:
-    - external_pull_requests
   script:
     - env |grep ^CI_
   variables:
@@ -28,4 +21,3 @@ build-pullrequest:
     BOOST_SCANNER_REGISTRY_MODULE: "boostsecurityio/native-scanner"
     CI_MERGE_REQUEST_IID: $CI_EXTERNAL_PULL_REQUEST_IID
     CI_MERGE_REQUEST_DIFF_BASE_SHA: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA
-
