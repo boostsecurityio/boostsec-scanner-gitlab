@@ -3,11 +3,6 @@ include:
 
 scan:
   stage: build
-  rules:
-    # execute on pushes to the main branch
-    - if: ($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "main")
-    # execute on pull request synchronization
-    - if: ($CI_PIPELINE_SOURCE == "external_pull_request_event") || ($CI_PIPELINE_SOURCE == "merge_request_event")
   extends:
     - .boost_scan
   script:
