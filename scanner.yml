@@ -54,8 +54,8 @@
   rules:
     # execute on pushes to the default branch
     - if: ($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH)
-    # execute on pull request synchronization
-    - if: ($CI_PIPELINE_SOURCE == "external_pull_request_event") || ($CI_PIPELINE_SOURCE == "merge_request_event")
+    # execute on merge request
+    - if: ($CI_PIPELINE_SOURCE == "merge_request_event")
 
 .boost_scan:
   extends:
