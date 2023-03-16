@@ -1,0 +1,29 @@
+include:
+   - local: 'scanner.yml'
+
+build-main:
+  stage: build
+  extends:
+    - .boost_scan
+  except:
+    - external_pull_requests
+  script:
+    - env |grep ^CI_
+  variables:
+    BOOST_API_ENABLED: "false"
+    BOOST_CLI_VERSION: "1.0.0.rc129"
+    BOOST_SCANNER_REGISTRY_MODULE: "boostsecurityio/native-scanner"
+
+build-pullrequest:
+  stage: build
+  extends:
+    - .boost_scan
+  only:
+    - external_pull_requests
+  script:
+    - env |grep ^CI_
+  variables:
+    BOOST_API_ENABLED: "false"
+    BOOST_CLI_VERSION: "1.0.0.rc129"
+    BOOST_SCANNER_REGISTRY_MODULE: "boostsecurityio/native-scanner"
+
