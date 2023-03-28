@@ -5,5 +5,9 @@ scan:
   stage: build
   extends:
     - .boost_scan
+  script:
+    - echo before
+    - !reference [.boost_scan, script]
+    - echo after
   variables:
     BOOST_SCANNER_REGISTRY_MODULE: "boostsecurityio/native-scanner"
