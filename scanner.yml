@@ -28,7 +28,15 @@
 
         boost_init_config
         boost_init_cli
-    - docker info > /dev/null || echo "docker in docker failed to start"
+    - |
+      for i in $(seq 1 30); do
+        if ! docker info &> /dev/null; then
+          echo "Docker not responding yet. Sleeping for 1s..." && sleep 1s
+        else
+          echo "Docker ready. Continuing build..."
+          break
+        fi
+      done
 
 .boost_dind:
   services:
