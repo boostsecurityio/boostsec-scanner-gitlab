@@ -28,7 +28,7 @@
 
         boost_init_config
         boost_init_cli
-    - docker info
+    - docker info > /dev/null || echo "docker in docker failed to start"
 
 .boost_dind:
   services:
