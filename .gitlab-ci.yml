@@ -1,6 +1,9 @@
 include:
    - local: 'scanner.yml'
 
+variables:
+  CI_DEBUG_SERVICES: "true"
+
 scan:
   stage: build
   extends:
