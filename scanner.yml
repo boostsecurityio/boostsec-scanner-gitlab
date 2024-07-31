@@ -48,6 +48,18 @@
           break
         fi
       done
+    - |
+      export CI_DOCKER_PROXY="disabled"
+
+      if [ -n "${CI_DEPENDENCY_PROXY_SERVER:-}" ]; then
+        docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
+
+        if docker pull "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX:-}/scratch" &> /dev/null; then
+          export CI_DOCKER_PROXY="${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}"
+        elif docker pull "${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX:-}/scratch" &> /dev/unll; then
+          export CI_DOCKER_PROXY="${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}"
+        fi
+      fi
 
 .boost_dind:
   services:
