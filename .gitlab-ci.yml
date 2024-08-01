@@ -6,4 +6,4 @@ scan:
   extends:
     - .boost_scan
   variables:
-    BOOST_SCANNER_REGISTRY_MODULE: "boostsecurityio/native-scanner"
+    BOOST_SCANNER_REGISTRY_MODULE: "boostsecurityio/scanner"
