@@ -48,6 +48,17 @@
           break
         fi
       done
+    - |
+      if [ "${CI_DOCKER_PROXY:-}" == "group" ]; then
+        export CI_DOCKER_PROXY="${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}"
+      elif [ "${CI_DOCKER_PROXY:-}" == "direct" ]; then
+        export CI_DOCKER_PROXY="${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}"
+      fi
+
+      if [ -n "${CI_DOCKER_PROXY:-}" ]; then
+        echo "${CI_DEPENDENCY_PROXY_PASSWORD}" | docker login "${CI_DEPENDENCY_PROXY_SERVER}" -u "${CI_DEPENDENCY_PROXY_USER}" --password-stdin
+      fi
+
 
 .boost_dind:
   services:
