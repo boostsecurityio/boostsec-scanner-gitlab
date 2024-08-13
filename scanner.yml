@@ -49,9 +49,9 @@
         fi
       done
     - |
-      if [ "${CI_DOCKER_PROXY:-}" == "group" ]; then
+      if [ "${BOOST_DOCKER_PROXY:-}" == "group" ]; then
         export CI_DOCKER_PROXY="${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}"
-      elif [ "${CI_DOCKER_PROXY:-}" == "direct" ]; then
+      elif [ "${BOOST_DOCKER_PROXY:-}" == "direct" ]; then
         export CI_DOCKER_PROXY="${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}"
       fi
 

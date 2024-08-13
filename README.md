@@ -42,18 +42,17 @@ The Boost Security API token secret.
 **NOTE**: We recommend you not put the API token directly in your pipeline
 file. Instead, it should be exposed via a **secret**.
 
-### `CI_DOCKER_PROXY` (Optional, string)
-
-Enable or disable the gitlab dependency proxy for docker images.
-May be set to one of the following values:
-- disabled: disable the proxy (default)
-- group: enable the group proxy
-- direct: enable the direct proxy
-
 ### `BOOST_CLI_VERSION` (Optional, string)
 
 Overrides the cli version to download when performing scans. If undefined,
 this will default to pulling "1".
+
+### `BOOST_DOCKER_PROXY` (Optional, string)
+
+Enable or disable the gitlab dependency proxy for docker images.
+May be set to one of the following values:
+- group: enable the group proxy
+- direct: enable the direct proxy
 
 ### `BOOST_IGNORE_FAILURE` (Optional, boolean string, default false)
 
