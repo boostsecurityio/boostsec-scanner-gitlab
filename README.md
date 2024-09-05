@@ -85,7 +85,7 @@ Optional identifier to uniquely identify the scanner
 
 Optional identifier to identify a a monorepo component
 
-### `BOOST_SCAN_TIMEOUT` (Optional, number)
+### `BOOST_SCAN_DIFF_TIMEOUT` (Optional, number)
 
-The optional timeout after which the Github check will be marked as failed. This defaults to 120 seconds.
+The optional scan timeout value, in seconds, after which the GitLab check will be marked as failed. This defaults to 120 seconds (2 minutes). Min value is 30 seconds, max value is 1800 seconds (30 minutes). For more information, please see the [source](https://github.com/boostsecurityio/boostsec-scanner-cli/blob/main/boostsec/scanner/cli/parameters/cli.py).
 
