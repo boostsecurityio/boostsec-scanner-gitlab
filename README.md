@@ -85,7 +85,11 @@ Optional identifier to uniquely identify the scanner
 
 Optional identifier to identify a a monorepo component
 
-### `BOOST_SCAN_TIMEOUT` (Optional, number)
+### `BOOST_DIFF_SCAN_TIMEOUT` (Optional, number)
 
-The optional timeout after which the Github check will be marked as failed. This defaults to 120 seconds.
+The optional timeout on a diff scan after which the Github check will be marked as failed. This defaults to 120 seconds.
+
+### `BOOST_MAIN_SCAN_TIMEOUT` (Optional, number)
+
+The optional timeout on a main scan after which the Github check will be marked as failed. This defaults to 2 hours.
 
