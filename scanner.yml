@@ -30,6 +30,12 @@
           export BOOST_DOWNLOAD_URL=${BOOST_DOWNLOAD_URL:-${BOOST_CLI_URL}/boost-cli/get-boost-cli}
 
           export BOOST_LOG_COLORS="true"
+
+          if [ -n "${BOOST_TRIGGER_ID:-}" ]; then
+            export BOOST_SCAN_MODE="trigger"
+          else
+            export BOOST_SCAN_MODE="repo"
+          fi
         }
 
         boost_init_cli () {
@@ -87,6 +93,6 @@
     - .boost_setup
     - .boost_rules
   script:
-    -  ${BOOST_EXE} scan repo ${BOOST_CLI_ARGUMENTS:-}
+    -  ${BOOST_EXE} scan ${BOOST_SCAN_MODE} ${BOOST_CLI_ARGUMENTS:-}
   variables:
     GIT_DEPTH: 1

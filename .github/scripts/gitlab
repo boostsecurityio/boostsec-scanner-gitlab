@@ -74,7 +74,9 @@ del.merge_request.id ()
 get.commit.status ()
 { # $1=project, $2=sha
   api "GET" "projects/${1}/repository/commits/${2}/statuses" \
-    | jq -r '.[].status'
+    | jq -r '.[].status' \
+    | head -n 1 \
+    | tr -d '[:space:]'
 }
 
 poll.commit.status ()
@@ -83,19 +85,17 @@ poll.commit.status ()
   local status laststatus
 
   let attempt+=1
-  laststatus="pending"
 
   while true; do
     attempt=$(($attempt + 1))
-    status=$(get.commit.status "${1}" "${2}")
+    status=$(echo $(get.commit.status "${1}" "${2}"))
 
-    info "polling commit status: ${attempt} or ${POLL_ATTEMPTS}"
-
-    if [ "${status}" != "${laststatus}" ]; then
-      info "- pipeline in ${status:-$laststatus}"
+    info "polling commit status: ${attempt}"
+    if [ "${status:-}" != "${laststatus:-}" ]; then
+      info "- pipeline in ${status:-none} was ${laststatus:-none}"
     fi
 
-    case "${status}" in
+    case "${status:-}" in
       success) return 0 ;;
       failed)  return 1 ;;
       canceled) return 1 ;;
