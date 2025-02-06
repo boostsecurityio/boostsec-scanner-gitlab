@@ -1,6 +1,27 @@
-.boost_setup:
-  image: "docker:26.1.0"
+spec:
+  inputs:
+    dnd_image:
+      type: string
+      default: "docker:26.1.0-dind"
+    docker_image:
+      type: string
+      default: "docker:26.1.0"
+---
 
+workflow:
+    rules:
+        - if: $BOOST_DOCKER_PROXY == "group"
+          variables:
+            IMAGE_PREFIX: $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/
+        - if: $BOOST_DOCKER_PROXY == "direct"
+          variables:
+            IMAGE_PREFIX: $CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/
+        - when: always
+          variables:
+            IMAGE_PREFIX: ""
+
+.boost_setup:
+  image: ${IMAGE_PREFIX}$[[ inputs.docker_image ]]
   before_script:
     - |
         {
@@ -65,10 +86,9 @@
         echo "${CI_DEPENDENCY_PROXY_PASSWORD}" | docker login "${CI_DEPENDENCY_PROXY_SERVER}" -u "${CI_DEPENDENCY_PROXY_USER}" --password-stdin
       fi
 
-
 .boost_dind:
   services:
-    - name: "docker:26.1.0-dind"
+    - name: ${IMAGE_PREFIX}$[[ inputs.dnd_image ]]
       alias: dockerdaemon
       # Support for listening on TCP without authentication or explicit
       # intent to run without authentication will be removed in the next
