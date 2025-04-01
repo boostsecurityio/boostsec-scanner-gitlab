@@ -1,0 +1,22 @@
+.boost_setup:
+  image: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:26.1.0"
+
+.boost_dind:
+  services:
+    - name: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:26.1.0-dind"
+      alias: dockerdaemon
+      # Support for listening on TCP without authentication or explicit
+      # intent to run without authentication will be removed in the next
+      # release
+      command: ["--host", "tcp://0.0.0.0:2375", "--tls=false"]
+
+  variables:
+    CI_DOCKER_PROXY: $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX
+    DOCKER_HOST: "tcp://dockerdaemon:2375/"
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+
+
+.boost_scan:
+  variables:
+    CI_DOCKER_PROXY: $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX
