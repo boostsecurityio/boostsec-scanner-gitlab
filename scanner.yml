@@ -1,5 +1,5 @@
 .boost_setup:
-  image: "docker:26.1.0"
+  image: "docker:28-cli"
 
   before_script:
     - |
@@ -62,7 +62,7 @@
 
 .boost_dind:
   services:
-    - name: "docker:26.1.0-dind"
+    - name: "docker:28-dind"
       alias: dockerdaemon
       # Support for listening on TCP without authentication or explicit
       # intent to run without authentication will be removed in the next
