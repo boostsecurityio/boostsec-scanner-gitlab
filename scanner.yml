@@ -1,5 +1,5 @@
 .boost_setup:
-  image: "docker:26.1.0"
+  image: "docker:28-cli"
 
   before_script:
     - |
@@ -46,7 +46,11 @@
         boost_init_config
         boost_init_cli
     - |
-      for i in $(seq 1 30); do
+      if [ -n "${CI_DOCKER_PROXY:-}" ]; then
+        echo "${CI_DEPENDENCY_PROXY_PASSWORD}" | docker login "${CI_DEPENDENCY_PROXY_SERVER}" -u "${CI_DEPENDENCY_PROXY_USER}" --password-stdin
+      fi
+    - |
+      for i in $(seq 1 60); do
         if ! docker info &> /dev/null; then
           echo "Docker not responding yet. Sleeping for 1s..." && sleep 1s
         else
@@ -54,27 +58,16 @@
           break
         fi
       done
-    - |
-      if [ "${BOOST_DOCKER_PROXY:-}" == "group" ]; then
-        export CI_DOCKER_PROXY="${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}"
-      elif [ "${BOOST_DOCKER_PROXY:-}" == "direct" ]; then
-        export CI_DOCKER_PROXY="${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}"
-      fi
-
-      if [ -n "${CI_DOCKER_PROXY:-}" ]; then
-        echo "${CI_DEPENDENCY_PROXY_PASSWORD}" | docker login "${CI_DEPENDENCY_PROXY_SERVER}" -u "${CI_DEPENDENCY_PROXY_USER}" --password-stdin
-      fi
 
 
 .boost_dind:
   services:
-    - name: "docker:26.1.0-dind"
+    - name: "docker:28-dind"
       alias: dockerdaemon
       # Support for listening on TCP without authentication or explicit
       # intent to run without authentication will be removed in the next
       # release
       command: ["--host", "tcp://0.0.0.0:2375", "--tls=false"]
-
   variables:
     DOCKER_HOST: "tcp://dockerdaemon:2375/"
     DOCKER_DRIVER: overlay2
@@ -89,9 +82,9 @@
 
 .boost_scan:
   extends:
+    - .boost_rules
     - .boost_dind
     - .boost_setup
-    - .boost_rules
   script:
     -  ${BOOST_EXE} scan ${BOOST_SCAN_MODE} ${BOOST_CLI_ARGUMENTS:-}
   variables:
