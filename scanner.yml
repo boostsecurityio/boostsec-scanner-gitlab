@@ -46,7 +46,8 @@
         boost_init_config
         boost_init_cli
     - |
-      if [ -n "${BOOST_DOCKER_PROXY:-}" ] && [ -n "${CI_DOCKER_PROXY}" ] ; then
+      if [ -n "${BOOST_DOCKER_PROXY:-}" ] && [ -z "${CI_DOCKER_PROXY}" ] ; then
+        # NOTE: backwards-compatibility for templates without multi-include
         if [ "${BOOST_DOCKER_PROXY:-}" == "group" ]; then
           export CI_DOCKER_PROXY="${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}"
         elif [ "${BOOST_DOCKER_PROXY:-}" == "direct" ]; then
