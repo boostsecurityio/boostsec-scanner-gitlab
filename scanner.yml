@@ -46,6 +46,14 @@
         boost_init_config
         boost_init_cli
     - |
+      if [ -n "${BOOST_DOCKER_PROXY:-}" ] && [ -n "${CI_DOCKER_PROXY}" ] ; then
+        if [ "${BOOST_DOCKER_PROXY:-}" == "group" ]; then
+          export CI_DOCKER_PROXY="${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}"
+        elif [ "${BOOST_DOCKER_PROXY:-}" == "direct" ]; then
+          export CI_DOCKER_PROXY="${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}"
+        fi
+      fi
+
       if [ -n "${CI_DOCKER_PROXY:-}" ]; then
         echo "${CI_DEPENDENCY_PROXY_PASSWORD}" | docker login "${CI_DEPENDENCY_PROXY_SERVER}" -u "${CI_DEPENDENCY_PROXY_USER}" --password-stdin
       fi
